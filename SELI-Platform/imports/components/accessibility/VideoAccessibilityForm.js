@@ -111,12 +111,9 @@ export function VideoMediaCaptionsAltA11Y(props){
 	//console.log("datos de video--",captionsTip, dataField)
 	const [showPreviewSignal, setshowPreviewSignal] = useState(false);
 	const [newCaption, setnewCaption] = useState(false);
+	
 	const getFileInformationCaption=(file)=>{		
-		if( file.name.split(".")[1]==='vtt'){
-			console.log("archivo de subtitulos", file.name.split(".")[1])
-			//captionValidator("vttvalido")
-			handleRadioButtonOnChangeValidator('captionsEmbebed','no')
-		}
+	    handleRadioButtonOnChangeValidator('captionsEmbebed','no')
 		dataField.fileTranscription[0]=file
 		setshowPreviewSignal(true)
 		setnewCaption(false)
@@ -166,9 +163,7 @@ export function VideoMediaCaptionsAltA11Y(props){
 				</RadioGroup>
 				<AccessibilityHelp idName='captions-radiogroup' error={dataField.captionsEmbebedError} tip={captionsTip}/>
 			</FormControl>
-
-				{//languages signal part
-
+			{//languages signal part
 				(dataField.captionsEmbebed === "no" || newCaption===true )?
 				<div>
 					{dataField.fileTranscription[0]===undefined?
@@ -221,11 +216,7 @@ export function VideoMediaAudioDescriptioA11Y(props){
 	//console.log("disabled_necAudioDesc",disabled_necAudioDesc)
 
 	const getFileInformationAudioDescription=(file)=>{
-		if( file.name.split(".")[1]==='mp3' || file.name.split(".")[1]==='wav'){
-			console.log("archivo de subtitulos de audio", file.name.split(".")[1])
-			//captionValidator("vttvalido")
-			handleRadioButtonOnChangeValidator('audioDescription','no')
-		}
+		handleRadioButtonOnChangeValidator('audioDescription','no')
 		dataField.fileAudioDescription[0]=file
 		setshowPreviewSignal(true)
 		setnewAudioSignal(false)
@@ -399,7 +390,6 @@ export function VideoMediaAudioDescriptioA11Y(props){
 		</Grid>
 	);
 }
-
 export function VideoMediaSignLanguageA11Y(props){
 	const {
 		handleRadioButtonOnChange,
@@ -416,12 +406,7 @@ export function VideoMediaSignLanguageA11Y(props){
 	//console.log("signLanguageTip",signLanguageTip)
 	
 	const  getFileInformationsignal=(file)=>{
-		console.log("File to uploadvideosignal", file)
-		if( file.name.split(".")[1]==='mp4' || file.name.split(".")[1]==='avi' || file.name.split(".")[1]==='mov'){
-			//console.log("archivo de lenfuaje de sennas", file.name.split(".")[1])
-			//captionValidator("vttvalido")
-			handleRadioButtonOnChangeValidator('signLanguage','no')
-		}
+		handleRadioButtonOnChangeValidator('signLanguage','no')
 		dataField.fileVideoSignal[0]=file
 		setshowPreviewSignal(true)
 		setnewVideoSignal(false)
@@ -684,7 +669,7 @@ export default function VideoA11Y(props){
 }
 
 export const useDataField = (props) => {
-	//console.log("props de ingreso", props)
+	console.log("props de ingreso en video", props)
 	const [dataField, setDataField] = React.useState({
 		signLanguage: 'no',
 		seizures: 'no',
@@ -750,8 +735,6 @@ export const useDataField = (props) => {
 		setDisabled_necAudioDesc(!(dataField.audioDescription === 'no'));
 		setDisabled_uploadAudioDesc((disabled_necAudioDesc? disabled_necAudioDesc : (dataField.audioDescriptionRequired === undefined || dataField.audioDescriptionRequired ==='no')));
 
-		//setIsA11Y(a11yInitial);
-		//getAccessibilityProgress();
 	}, [dataField]);
 
 	function captionValidator(validator){
@@ -764,7 +747,6 @@ export const useDataField = (props) => {
 	}
 
 	function handleInputOnChange ({ target: { name, value } }){
-
 		console.log(" handleInputOnChange", name, value )
 		let errField = name + 'Error';
 		let errValue = false;
@@ -777,12 +759,9 @@ export const useDataField = (props) => {
 				errValue = false
 			}
 		}
-
 		if(name === 'shortDescription'){
 			errValue = value === '';
 		}
-
-		
 
 		setDataField(dataField => ({...dataField,
 			[name]: value,
@@ -790,7 +769,6 @@ export const useDataField = (props) => {
 		}));
 
 		console.log("dataFieldVideo",dataField)
-
 		let arr = [...isA11Y];
 		arr.find(a => a.name == name).is_a11y = !errValue;
 		setIsA11Y(arr)

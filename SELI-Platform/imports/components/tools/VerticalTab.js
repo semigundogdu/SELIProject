@@ -12,8 +12,9 @@ import VideoItem from '../accessibility/previews/VideoItem';
 import ImageItem from '../accessibility/previews/ImageItem';
 /* a11y content forms */
 import ImageA11yForm, {useImageDataField} from '../accessibility/ImageAccessibilityForm';
+import {QuizAccessibility,QuizAccessibilityExtendedTime,QuizAccessibilityWarningTime,useQuizDataField } from '../accessibility/QuizAccessibilityForm';
 import {VideoTextAltA11Y, VideoMediaCaptionsAltA11Y, VideoMediaSignLanguageA11Y, VideoMediaAudioDescriptioA11Y, VideoOthersA11Y, useDataField} from '../accessibility/VideoAccessibilityForm';
-import AudioA11yForm, {useAudioDataField, VideoSignalA11Y} from '../accessibility/AudioAccessibilityForm';
+import AudioA11yForm, {useAudioDataField, AudioA11YCaptions ,VideoSignalA11Y} from '../accessibility/AudioAccessibilityForm';
 import A11YProgressFeedback from '../accessibility/a11yProgressFeedback';
 import Fab from '@material-ui/core/Fab';
 import AccessibilityNewIcon from '@material-ui/icons/AccessibilityNew';
@@ -74,6 +75,8 @@ export const useData = (language, type, item) => {
 		return useImageDataField({language, item});
 	if(type === 'audio')
 		return useAudioDataField({language, item});
+	if(type === 'quiz')
+		return useQuizDataField({language, item});
 	return  {
 		isA11Y: [],
 	};
@@ -90,7 +93,7 @@ export default function VerticalTabs(props) {
 	}
 
 	useEffect(() => {
-		console.log("props.support",props.support)
+		//console.log("props.support",props.support)
 		let supportAux = [];
 		props.support.map((option) => {
 			supportAux.push(option)
@@ -102,6 +105,7 @@ export default function VerticalTabs(props) {
 	let indexPanel = 0;
 
 	let data = useData(props.language, props.contentTypeAdded, props.item.accessibility);
+	console.log("*******data*********",data)
 
 	let dataToSend = {
 		dataField: data.dataField,
@@ -131,6 +135,27 @@ export default function VerticalTabs(props) {
 							props.contentTypeAdded === 'image' && support.some(object => ["Cognitive", "Hearing", "Speech","Visual"].includes(object)) &&
 						<Tab
 							label={props.language.textAlternatives}
+							{...a11yProps(indexTab++, props.contentTypeAdded)}
+						/>
+					}
+					{
+							props.contentTypeAdded === 'quiz' && support.some(object => ["Cognitive", "Hearing", "Speech","Visual"].includes(object)) &&
+						<Tab
+							label={props.language.notime}
+							{...a11yProps(indexTab++, props.contentTypeAdded)}
+						/>
+					}
+					{
+							props.contentTypeAdded === 'quiz' && support.some(object => ["Cognitive", "Hearing", "Speech","Visual"].includes(object)) &&
+						<Tab
+							label={props.language.extendedTime}
+							{...a11yProps(indexTab++, props.contentTypeAdded)}
+						/>
+					}
+					{
+							props.contentTypeAdded === 'quiz' && support.some(object => ["Cognitive", "Hearing", "Speech","Visual"].includes(object)) &&
+						<Tab
+							label={props.language.warningTime}
 							{...a11yProps(indexTab++, props.contentTypeAdded)}
 						/>
 					}
@@ -178,7 +203,6 @@ export default function VerticalTabs(props) {
 					}
 					
 					{
-						
 							props.contentTypeAdded === 'audio' && support.some(object => ["Cognitive", "Hearing", "Speech","Visual"].includes(object)) &&
 						<Tab
 							label={props.language.textAlternatives}
@@ -186,40 +210,12 @@ export default function VerticalTabs(props) {
 						/>
 					}
 					{
-							//   <Tab label="A11y Text" {...a11yProps(1)} />
-							// props.contentTypeAdded === 'text'&&
-
-
-							// props.contentTypeAdded === 'link'&&
-							//   <Tab label="A11y link" {...a11yProps(1)} />
-
-							// props.contentTypeAdded === 'pdf'&&
-							//   <Tab label="A11y pdf" {...a11yProps(1)} />
-
-							// props.contentTypeAdded === 'compressed'&&
-							//   <Tab label="A11y compressed" {...a11yProps(1)} />
-
-							// props.contentTypeAdded === 'h5p'&&
-							//   <Tab label="A11y h5p" {...a11yProps(1)} />
-
-							// props.contentTypeAdded === 'quiz'&&
-							//   <Tab label="A11y quiz" {...a11yProps(1)} />
-
-							// props.contentTypeAdded === 'activity'&&
-							//   <Tab label="A11y activity" {...a11yProps(1)} />
-
-							// props.contentTypeAdded === 'embebed'&&
-							//   <Tab label="A11y embebed" {...a11yProps(1)} />
-
-							// props.contentTypeAdded === 'unity'&&
-							//   <Tab label="A11y unity" {...a11yProps(1)} />
-							// <Tab label={
-							// 	<React.Fragment>
-							// 		<A11YProgressFeedback a11yFields={data.isA11Y}/>
-							// 	</React.Fragment>
-							// } {...a11yProps(indexTab++,props.contentTypeAdded)} disabled className={classes.disabled}/>
+							props.contentTypeAdded === 'audio' && support.some(object => ["Cognitive", "Hearing", "Speech","Visual"].includes(object)) &&
+						<Tab
+							label={props.language.audioTranscription}
+							{...a11yProps(indexTab++)}
+						/>
 					}
-
 					
 					{
 						data.isA11Y.length > 0 ? 
@@ -245,6 +241,7 @@ export default function VerticalTabs(props) {
 							/>
 						: undefined
 					}
+
 				</Tabs>
 				<div className="accessibility-form-side-container">
 					<TabPanel value={value} index={indexPanel++}>
@@ -256,6 +253,13 @@ export default function VerticalTabs(props) {
 							:
 							undefined
 						}
+						{
+							props.contentTypeAdded === 'quiz' ?
+								<div>{props.language.quizAccessibility}</div>
+							:
+							undefined
+						}
+						
 						{
 							props.contentTypeAdded === 'video' ?
 								<VideoItem
@@ -274,8 +278,9 @@ export default function VerticalTabs(props) {
 							:
 							undefined
 						}
+						
 					</TabPanel>
-					{/* <TabPanel value={value} index={indexPanel++}></TabPanel> */}
+				
 					{
 						props.contentTypeAdded === 'image' &&
 							<React.Fragment>
@@ -303,11 +308,75 @@ export default function VerticalTabs(props) {
 							</React.Fragment>
 					}
 					{
+						props.contentTypeAdded === 'quiz' &&
+						<React.Fragment>
+								{support.some(object => ["Cognitive", "Hearing", "Speech"].includes(object)) &&
+									<TabPanel value={value} index={indexPanel++}>
+										<QuizAccessibility
+											data={{
+												myFormatminutes:data.myFormatminutes,
+												handleChange:data.handleChange , 
+												handleRadioButtonOnChangeValidator: data.handleRadioButtonOnChangeValidator,
+												handleRadioButtonOnChange: data.handleRadioButtonOnChange,
+												dataField: data.dataField,
+												noTimeTip:data.noTimeTip,
+												extendedTimeTip:data.extendedTimeTip,
+												alertMomentTip:data.alertMomentTip
+											}}
+											item={props.item}
+											language={props.language}
+										/>
+									</TabPanel>}
+
+
+									{support.some(object => ["Cognitive", "Hearing", "Speech"].includes(object)) &&
+									<TabPanel value={value} index={indexPanel++}>
+										<QuizAccessibilityExtendedTime
+											data={{
+												myFormatminutes:data.myFormatminutes,
+												handleChange:data.handleChange , 
+												handleRadioButtonOnChangeValidator: data.handleRadioButtonOnChangeValidator,
+												handleRadioButtonOnChange: data.handleRadioButtonOnChange,
+												dataField: data.dataField,
+												noTimeTip:data.noTimeTip,
+												extendedTimeTip:data.extendedTimeTip,
+												alertMomentTip:data.alertMomentTip
+											}}
+											item={props.item}
+											language={props.language}
+										/>
+									</TabPanel>}
+
+
+									{support.some(object => ["Cognitive", "Hearing", "Speech"].includes(object)) &&
+									<TabPanel value={value} index={indexPanel++}>
+										<QuizAccessibilityWarningTime
+											data={{
+												myFormatminutes:data.myFormatminutes,
+												handleChange:data.handleChange, 
+												handleRadioButtonOnChangeValidator: data.handleRadioButtonOnChangeValidator,
+												handleRadioButtonOnChange: data.handleRadioButtonOnChange,
+												dataField: data.dataField,
+												noTimeTip:data.noTimeTip,
+												extendedTimeTip:data.extendedTimeTip,
+       											alertMomentTip:data.alertMomentTip
+											}}
+											item={props.item}
+											language={props.language}
+										/>
+									</TabPanel>}
+									
+											
+						</React.Fragment>
+								
+					}
+					{
 						props.contentTypeAdded === 'audio' &&
 								<React.Fragment>
 									{support.some(object => ["Cognitive", "Hearing", "Speech","Visual"].includes(object)) &&
 										<TabPanel value={value} index={indexPanel++}>
 											<AudioA11yForm data={{
+												captionsTip:data.captionsTip,
 												handleInputOnChange:data.handleInputOnChange,
 												handleLongDescriptionPosition:data.handleLongDescriptionPosition,
 												dataField:data.dataField,
@@ -318,26 +387,34 @@ export default function VerticalTabs(props) {
 											language={props.language}
 											/>
 										</TabPanel>}
-										{/* <TabPanel value={value} index={indexPanel++}>
-											<VideoSignalA11Y data={{
-												handleRadioButtonOnChange: data.handleRadioButtonOnChange,
-												dataField: data.dataField,
-												signLanguageTip: data.signLanguageTip
+
+										{support.some(object => ["Cognitive", "Hearing", "Speech","Visual"].includes(object)) &&
+										<TabPanel value={value} index={indexPanel++}>
+											<AudioA11YCaptions data={{
+												captionsTip:data.captionsTip,
+												handleRadioButtonOnChange:data.handleRadioButtonOnChange,
+												changeText:data.changeText,
+												addTranscription:data.addTranscription,
+												handleSubmit:data.handleSubmit,
+												remove:data.remove,
+												time:data.time,
+												handleInputOnChange:data.handleInputOnChange,
+												handleLongDescriptionPosition:data.handleLongDescriptionPosition,
+												dataField:data.dataField,
+												shortDescriptionTip:data.shortDescriptionTip,
+												longDescriptionTip:data.longDescriptionTip,
+												iisA11Y:data.isA11Y,
 											}}
 											language={props.language}
 											/>
-										</TabPanel> */}
+										</TabPanel>}
 
-										{/* <TabPanel value={value} index={indexPanel++}>
-											<VideoMediaSignLanguageA11Y data={{
-												handleRadioButtonOnChange: data.handleRadioButtonOnChange,
-												dataField: data.dataField,
-												signLanguageTip: data.signLanguageTip
-											}}
-											language={props.language}/>
-										</TabPanel> */}
+
+										
+									
 								</React.Fragment>
 					}
+					
 
 					{
 						props.contentTypeAdded === 'video' &&

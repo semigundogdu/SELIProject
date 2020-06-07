@@ -1,16 +1,13 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import AccessibilityNewIcon from '@material-ui/icons/AccessibilityNew';
 import WatchLaterIcon from '@material-ui/icons/WatchLater';
-import BottomMenu from '../navigation/BottomMenu';
 import ContentMenuItem from './ContentMenuItem';
 import ContentItem from './ContentItem';
 import SortItem from './items/SortItem';
@@ -26,9 +23,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-/* Trasitions */
-import Slide from '@material-ui/core/Slide';
-import Grow from '@material-ui/core/Grow';
 /* Content Forms */
 import TextForm from '../content/TextForm';
 import ImageForm from '../content/ImageForm';
@@ -52,22 +46,9 @@ import DoneIcon from '@material-ui/icons/Done';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import Tooltip from '@material-ui/core/Tooltip';
-/* Accessibility Forms */
-import VideoAccessibilityForm from '../accessibility/VideoAccessibilityForm';
-/* Snackbar */
-import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import InfoIcon from '@material-ui/icons/Info';
-import { FaThumbsDown } from 'react-icons/fa';
 import WarningIcon from '@material-ui/icons/Warning';
-
-function TransitionRight(props) {
-  return <Slide {...props} direction="right" />;
-}
-const GrowTransition = React.forwardRef(function Transition(props, ref) {
-  return <Grow ref={ref} {...props} />;
-});
 
 export default class CourseCreatorTool extends React.Component {
   constructor(props) {
@@ -121,7 +102,7 @@ export default class CourseCreatorTool extends React.Component {
     let type = e.payload.type;
     let courseInformation = this.state.courseInformation;
     let languageTypeAdded = "";
-    if (type === 'text'){ languageTypeAdded = this.props.language.text }
+    if    (type === 'text'){ languageTypeAdded = this.props.language.text }
     else if (type === 'image'){ languageTypeAdded = this.props.language.image }
     else if (type === 'video'){ languageTypeAdded = this.props.language.video }
     else if (type === 'audio'){ languageTypeAdded = this.props.language.audio }
@@ -163,6 +144,7 @@ export default class CourseCreatorTool extends React.Component {
     let courseInformation = this.state.courseInformation;
     let index;
     let itemContent = this.getItemAttributes();
+    console.log("boton de crear el contenido",itemContent,courseInformation)
 
     //console.log("courseInformation",courseInformation)
     //console.log("courseInformation",itemContent)
@@ -202,11 +184,12 @@ export default class CourseCreatorTool extends React.Component {
         }
       }
       let showAccessibilityOptions = false;
-      if (this.state.contentTypeAdded === "audio" || this.state.contentTypeAdded === "image" || this.state.contentTypeAdded === "video") {
+      if (this.state.contentTypeAdded === "audio" || this.state.contentTypeAdded === "image" || this.state.contentTypeAdded === "video" ||   this.state.contentTypeAdded==='quiz') {
         showAccessibilityOptions = true;
       }
       else {
       }
+      console.log("showAccessibilityOptions",showAccessibilityOptions,showAccessibilityOptions)
       this.setState({
         showAccessibilityOptions: showAccessibilityOptions,
         showCourseOrganization: false,
@@ -408,9 +391,6 @@ export default class CourseCreatorTool extends React.Component {
   validateOrganization(value) {
     this.setState({
       correctOrganization: value,
-    }, () => {
-      !this.state.correctOrganization ? this.showCreatorToolMessage('navigation') : undefined
-      this.state.correctOrganization ? this.handleCloseSnackbar() : undefined
     });
   }
 
@@ -428,31 +408,12 @@ export default class CourseCreatorTool extends React.Component {
         showCourseOrganization: false,
         contentOpen: false,
       });
-      this.showCreatorToolMessage("navigation");
     }
   }
   
   reRender(){
     this.forceUpdate();
     this.setState({ state: this.state });
-  }
-  handleSnackbar = () => {
-    this.setState({ openSnackbar: true });
-  };
-
-  handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    this.setState({ openSnackbar: false });
-  };
-
-  showCreatorToolMessage(type) {
-    this.setState({
-      snackbarType: type,
-    }, () => {
-      this.handleSnackbar();
-    });
   }
 
   getAccessibilityPercentage = (value) => {
@@ -504,6 +465,7 @@ export default class CourseCreatorTool extends React.Component {
         }
       }
     }
+    
     if (courseInformation.organization.subunit) {
       courseInformation.program[this.props.selected[0]].lessons[this.props.selected[1]].items[index].attributes.accessibility.pureDecorative = !courseInformation.program[this.props.selected[0]].lessons[this.props.selected[1]].items[index].attributes.accessibility.pureDecorative;
     }
@@ -725,7 +687,6 @@ export default class CourseCreatorTool extends React.Component {
                           reRender={this.reRender.bind(this)}
                           turnOffSortMode={this.turnOffSortMode.bind(this)}
                           setMenuTab={this.setMenuTab.bind(this)}
-                          showCreatorToolMessage={this.showCreatorToolMessage.bind(this)}
                           dialog={true}
                           language={this.props.language}
                         />
@@ -909,7 +870,6 @@ export default class CourseCreatorTool extends React.Component {
                           reRender={this.reRender.bind(this)}
                           turnOffSortMode={this.turnOffSortMode.bind(this)}
                           setMenuTab={this.setMenuTab.bind(this)}
-                          showCreatorToolMessage={this.showCreatorToolMessage.bind(this)}
                           dialog={true}
                           language={this.props.language}
                         />
@@ -953,7 +913,7 @@ export default class CourseCreatorTool extends React.Component {
                   //disabled={this.state.showCourseOrganization || this.state.showAccessibilityOptions || this.state.showAccessibilityForm}
                   onClick={() => {
                     this.contentHandleClose();
-                    if (this.state.contentToEdit === undefined) {
+                    if (this.state.contentToEdit === undefined && !this.state.showAccessibilityOptions) {
                       this.cancelContentCreation();
                     }
                   }}
@@ -1023,6 +983,7 @@ export default class CourseCreatorTool extends React.Component {
                   :
                   undefined
                 }
+                
                 {
                   this.state.contentTypeAdded === 'image' && !this.state.showAccessibilityOptions ?
                     <ImageForm
@@ -1034,6 +995,7 @@ export default class CourseCreatorTool extends React.Component {
                   :
                   undefined
                 }
+
                 {
                   this.state.contentTypeAdded === 'video' && !this.state.showAccessibilityOptions && !this.state.showAccessibilityForm ?
                     <VideoForm
@@ -1166,8 +1128,9 @@ export default class CourseCreatorTool extends React.Component {
             :
             undefined
           }
+
           {
-            this.state.showAccessibilityOptions && (this.state.contentTypeAdded === 'image' || this.state.contentTypeAdded === 'audio' || this.state.contentTypeAdded === 'video') ?  
+            this.state.showAccessibilityOptions && (this.state.contentTypeAdded === 'quiz' || this.state.contentTypeAdded === 'image' || this.state.contentTypeAdded === 'audio' || this.state.contentTypeAdded === 'video') ?  
              //this.contentHandleClose()  // uncomment for view accessibility Menu
               <div className="configure-accessibility-actions"> 
                 <List>
@@ -1192,6 +1155,7 @@ export default class CourseCreatorTool extends React.Component {
             :
               undefined
           }
+          {console.log("parametros de configuracion importantes--",this.state.showAccessibilityOptions ,this.state.contentTypeAdded,this.state.contentToConfigureAccessibility )}
           {
             this.state.showAccessibilityForm ?
               <React.Fragment>

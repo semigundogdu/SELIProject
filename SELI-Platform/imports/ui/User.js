@@ -35,9 +35,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import CloseIcon from '@material-ui/icons/Close';
-import Snackbar from '@material-ui/core/Snackbar';
-import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 
 import {checkUserType} from '../../lib/userSesions';
@@ -59,6 +56,7 @@ export default class User extends React.Component {
       savedCourseWindow: false,
       accountType: '',
       selected: [-1, -1],
+      chekingSesion: true,
     }
   }
 
@@ -67,35 +65,39 @@ export default class User extends React.Component {
     this.setState({
       language: Session.get('language') ? Session.get('language') : english,
     });
-    this.setState({
-      chekingSesion: true,
-    }, () => {
+    if (this.props.history.location.user) {
+      this.setInitVariables(this.props.history.location.user);
+    } else {
       Meteor.call("GetUserById", Meteor.userId(), (error, response) =>  {
-        let language = {};
-        if (response[0].profile.configuration.language === 'us') {
-          language = english;
-        }
-        else if (response[0].profile.configuration.language === 'pt') {
-          language = portuguese;
-        } 
-        else if (response[0].profile.configuration.language === 'es') {
-          language = spanish;
-        }
-        else if (response[0].profile.configuration.language === 'pl') {
-          language = polish;
-        }
-        else if (response[0].profile.configuration.language === 'tr') {
-          language = turkish;
-        }
-        this.setState({
-          language: language,
-          user: response[0],
-          chekingSesion: false,
-        }, () => {
-          checkUserType(Meteor.userId(), this.state.user.profile.type, this.props.history);
-          this.setLanguage(this.state.user.profile.configuration.language);
-        });
+        this.setInitVariables(response);
       });
+    }
+  }
+
+  setInitVariables = (response) => {
+    let language = {};
+    if (response.profile.configuration.language === 'us') {
+      language = english;
+    }
+    else if (response.profile.configuration.language === 'pt') {
+      language = portuguese;
+    } 
+    else if (response.profile.configuration.language === 'es') {
+      language = spanish;
+    }
+    else if (response.profile.configuration.language === 'pl') {
+      language = polish;
+    }
+    else if (response.profile.configuration.language === 'tr') {
+      language = turkish;
+    }
+    this.setState({
+      language: language,
+      user: response,
+      chekingSesion: false,
+    }, () => {
+      checkUserType(response, this.state.user.profile.type, this.props.history);
+      this.setLanguage(this.state.user.profile.configuration.language);
     });
   }
 
@@ -167,8 +169,8 @@ export default class User extends React.Component {
       }
       if (action === 'dashboard'){
         action = () => this.showComponent('dashboard');
+        
       }
-
       this.setState({
         showControlMessage: show,
         controlMessage: message,
@@ -665,6 +667,8 @@ export default class User extends React.Component {
                     }
                   </main>
                 </div>
+              
+              
                 <ControlSnackbar
                   showControlMessage={this.state.showControlMessage}
                   showControlAction={this.state.showControlAction}
@@ -672,6 +676,7 @@ export default class User extends React.Component {
                   controlAction={this.state.controlAction}
                   controlActionMessage={this.state.controlActionMessage}
                   handleControlMessage={this.handleControlMessage.bind(this)}
+                  time={this.state.controlMessage==="Quiz successfully done" ? 800: 8000}
                 />
                 <LoadingSnackbar
                   showLoadingMessage={this.state.showLoadingMessage}

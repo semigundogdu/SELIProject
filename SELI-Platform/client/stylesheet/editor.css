@@ -14,7 +14,7 @@
   width: calc(100% - 1vw);
   height: auto;
   padding-right: 1vw;
-  margin-top: 2.5vh;
+  margin-top: 1vh;
 }
 
 .editor-tools {
@@ -94,7 +94,7 @@
 }
 
 .editor-label {
-  padding: 0 3.5vh !important;
+  margin-top: 1.5vh;
   text-align: center;
   font-size: 1.3em;
   color: #333;
@@ -112,6 +112,12 @@
 .editor-link-button {
   height: 40px !important;
   width: 40px !important;
+  border: solid 1px #e0e0e0 !important;
+}
+
+.editor-link-button-story {
+  height: 40px !important;
+  color: #757575 !important;
   border: solid 1px #e0e0e0 !important;
 }
 

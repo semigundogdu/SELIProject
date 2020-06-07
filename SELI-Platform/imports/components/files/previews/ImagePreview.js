@@ -22,8 +22,8 @@ export default class ImagePreview extends React.Component {
     this.setState({
       nameWithoutExtension: true,
     });
-    file.name = file.name.toString().split('.');
-    file.name = file.name[0];
+    //file.name = file.name.toString().split('.');
+    //file.name = file.name[0];
   }
 
   delete(){
@@ -41,7 +41,7 @@ export default class ImagePreview extends React.Component {
   }
 
   coordenadaCursos=(coordenada)=>{
-    console.log("COORDENADA CURSOS--->", coordenada )
+    //console.log("COORDENADA CURSOS--->", coordenada )
     this.props.coordenadasCursosImageForm(coordenada)
   }
   

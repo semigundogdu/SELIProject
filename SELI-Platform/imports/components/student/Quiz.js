@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import WarningIcon from '@material-ui/icons/Warning';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -44,43 +49,100 @@ class Quiz extends React.Component {
     super(props);
     this.state = {
       selected: 0,
-      answers: [], //should be load at start of the componen
-      panelshow: '',
+      answers: [], //should be load at start of the component
+      panelshow:'',
       age: '',
       open: false,
-      selectedtime:'',
       alert: '',
       answertest: false,
       average:'',
       successTrue:'',
       Incorrect:'',
+      extraTime:false,
+      start:false,
+      alertTimeValue:'',
+      handleTick:'',
+      extendedTime:"",
+      newaddTime:"",
+      selectedtime:'',
+      noTime:false
     }
   }
 
   componentDidMount() {
-    //console.log("numero de respuetas por pregunta", this.props.quiz.attributes.questions)
+    console.log("datos de quiz", this.props)
+    this.setState({
+      start:false,
+     // selectedtime: this.props.quiz.attributes.extendtime
+    })
+    //configure warningalerts must consider default alerts and teacher alerts
+    if(this.props.time>0){
+      if(this.props.quiz.attributes.accessibility.isA11Y===undefined){
+        let timeLimit=((this.props.time)/(60*1000))
+        if(timeLimit>19){
+          this.setState({alertTimeValue: 10})
+        }else{
+          this.setState({alertTimeValue: (timeLimit/2)})
+        }
+      }else{//when is no undefined
+        if(this.props.quiz.attributes.accessibility.isA11Y[1].is_a11y===true){
+          this.setState({
+            extraTime:true, //see if there is extra time and put it into the state
+            extendedTime:this.props.quiz.attributes.accessibility.dataField.extendedTimeValue, // in th for "hh:mm:ss"
+            
+          })
+        }
+        if(this.props.quiz.attributes.accessibility.isA11Y[0].is_a11y===true){
+          this.setState({
+           noTime:true
+          })
+        }
+        if (this.props.quiz.attributes.accessibility.isA11Y[2].is_a11y===false){//when warning alert is false
+          console.log("paso3")
+          let timeLimit=((this.props.time)/(60*1000))
+          if(timeLimit>19){
+            this.setState({alertTimeValue: 10})
+          }else{
+            this.setState({alertTimeValue: (timeLimit/2)})
+          }
+        }
+        else{ //when is_a11y true
+          let warning=this.props.quiz.attributes.accessibility.dataField.warningAlertValue.split(":")
+          let warningtime=(parseInt(warning[0])*60+parseInt(warning[1])+(parseInt(warning[2])/60))
+          this.setState({alertTimeValue:warningtime })
+        }
+      }
+    }else { //time is zero we need without time for all students
+      this.setState({
+        panelshow: 'stop'
+      })
+    }
     
+  }
+  componentDidUpdate(prevProps,prevState) {
+     if (prevState.selectedtime !== this.state.selectedtime) {
+       this.setState({start:false})
+     
+    } 
   }
 
   componentWillMount(){
-    console.log("Correct",this.props.quiz.attributes.questions )
     let answers = this.state.answers;
     let controlAnswers = this.state.controlAnswers;
     let questions = this.props.quiz.attributes.questions;
+    
     questions.map(question => {
       let answerlength=question.correctAnswers.length;
       answers.push(Array.apply(null, new Array(answerlength)).map(Boolean.prototype.valueOf,false));
     })
     this.setState({
       answers: answers,
-      start: false,
       panelshow: this.props.time,
       selectedtime: this.props.time
     });
   }
 
   handleChange = (check,event) => {
-    //console.log("check and index",this.state.selected, check , this.state.answers, 'event---', event.target.checked)
     let answers = this.state.answers;
     answers[this.state.selected][check]=event.target.checked;
     this.setState({
@@ -174,47 +236,44 @@ class Quiz extends React.Component {
     return({score: TotalAverage, hits: TotalCorrectTrue,  Incorrect: TotalIncorrect, answers: answers, trueAnswers: this.props.quiz.attributes.questions});
   }
 
-  handleFinish = (validate) => {
-    this.setState({
-      start: true,
-    });
-    if(validate) {
-      if (this.validateQuiz()) { // always validate inclusive without any question resolved
-        let results = this.getQuizResults(this.state.answers);
-        let approved;
-        console.log("results", results)
-         results.score >= this.props.quiz.attributes.approvalPercentage ? approved = true : approved = false;
-        let quiz = {
-          score: results.score,
-          hits: results.hits,
-          approved: approved,
-          public: false,
-          type: 'quiz',
-          Incorrect: results.Incorrect,
-          answers:results.answers,
-          trueAnswers:results.trueAnswers
+  handleFinish = (validate, type) => {
+        if(validate) {
+          if (this.validateQuiz()) { // always validate inclusive without any question resolved
+            let results = this.getQuizResults(this.state.answers);
+            let approved;
+            
+            results.score >= this.props.quiz.attributes.approvalPercentage ? approved = true : approved = false;
+            let quiz = {
+              score: results.score,
+              hits: results.hits,
+              approved: approved,
+              public: false,
+              type: 'quiz',
+              Incorrect: results.Incorrect,
+              answers:results.answers,
+              trueAnswers:results.trueAnswers
+            }
+            this.props.completeActivity(this.props.quiz.id, quiz); 
+          } 
         }
-        this.props.completeActivity(this.props.quiz.id, quiz); 
-      } 
-    }
-     else {
-      console.log("no validate..")
-      let score = this.getQuizResults(this.state.answers);
-      let approved;
-      score >= this.props.quiz.attributes.approvalPercentage ? approved = true : approved = false;
-      let quiz = {
-        score: results.score,
-          hits: results.hits,
-          approved: approved,
-          public: false,
-          type: 'quiz',
-          Incorrect: results.Incorrect,
-          answers:results.answers,
-          trueAnswers:results.trueAnswers
-      }
-      this.props.completeActivity(this.props.quiz.id, quiz);
-    }
-    this.props.handleClose(); 
+        else {
+          let score = this.getQuizResults(this.state.answers);
+          let approved;
+          score >= this.props.quiz.attributes.approvalPercentage ? approved = true : approved = false;
+          let quiz = {
+            score: results.score,
+              hits: results.hits,
+              approved: approved,
+              public: false,
+              type: 'quiz',
+              Incorrect: results.Incorrect,
+              answers:results.answers,
+              trueAnswers:results.trueAnswers
+          }
+          this.props.completeActivity(this.props.quiz.id, quiz);
+        }
+        this.props.handleClose(); 
+      
   }
 
   showFinishConfirmation = () => {
@@ -239,13 +298,16 @@ class Quiz extends React.Component {
     progress = (100 * time) / (fullTime / 1000);
     this.setState({
       progress: progress,
+      handleTick: time
     })
-
-    if(seconds==0 && minutes==1 && hours==0){
+     if(time===(this.state.alertTimeValue*60)){
       this.setState({
         alert: 'alert',
+        open: true,
       })
-    }
+    } 
+    
+
   }
 
   stoptime= ()=>{
@@ -259,14 +321,15 @@ class Quiz extends React.Component {
       panelshow: 'adjust'
     })
   }
-  handleChangeselector = event => {
-     let time=(event.target.value*this.props.time)
+
+ 
+
+  closeExtraTime = () => {
     this.setState({
-        age: event.target.value,
-        selectedtime: time,
-        panelshow: 'cambio'
-      }) 
-    };
+      panelshow: 'exitExtraTime'
+    })
+  }
+  
 
   handleClose = () => {
     this.setState({
@@ -282,20 +345,17 @@ class Quiz extends React.Component {
       //console.log("se abrio")
   };
 
- 
-
-  cambio=(time)=>{
-    //console.log("Cambio a: ", time, this.state.panelshow)
+  cambio=()=>{
     const { classes } = this.props;
     return(
-      <div key={time}>
+      <div key={this.state.selectedtime}>
         <TimerMachine 
-            timeStart={time} // start at 10 seconds
-            timeEnd={0} // end at 20 seconds
+            timeStart={this.state.selectedtime} // start at 10 seconds
+            timeEnd={0}       // end at 20 seconds
             started={true}
-            paused={this.state.start}
-            countdown={true} // use as stopwatch
-            interval={1000} // tick every 1 second
+            paused={this.state.start}//false
+            countdown={true}  // use as stopwatch
+            interval={1000}   // tick every 1 second
             formatTimer={(time, ms) =>
               moment.duration(ms, "milliseconds").format("hh:mm:ss", {
                 trim: false
@@ -305,58 +365,67 @@ class Quiz extends React.Component {
               this.handleTick(time)
             }
             onComplete={time =>
-              this.handleFinish(false)
+              this.handleFinish(true, "finish")
             }
           />
           <div className={classes.root }>
               <LinearProgress />
               <LinearProgress color="secondary" />
             </div>
-          <Button onClick={()=>this.reload()} className="timebutton">{this.props.language.startVerb}</Button>
       </div>
     )
+  
   }
-
-  reload = () => {
-    let selected = this.state.selected;
-    
-  }
-
   alerta =() =>{
     return(
-      <div className="sign-actions1">
-        <React.Fragment className="alert" >
-            <DialogTitle className="success-dialog-title" id="alert-dialog-title">
-              {this.props.language.warningTime}
-            </DialogTitle>
-            <div className="center-row">
-            <Button onClick={()=>this.handleClosepublish()} variant="contained"  color="secondary" className="bar-button"
-            >
-              {this.props.language.continue}
-            </Button>	
-            <Button onClick={()=>this.handleMoreTime()} variant="contained"  color="primary" className="bar-button"
-            >
-              {this.props.language.moreTime}
-            </Button>	                 
-            </div>
-        </React.Fragment>
-      </div>
-
+      <Dialog
+        open={this.state.open}
+        onClose={this.handleClose}
+        aria-labelledby="alert-dialog-confirmation"
+        aria-describedby="alert-dialog-confirmation"
+      >
+      <DialogTitle  tabIndex="-1" className="success-dialog-title" id="alert-dialog-title">{this.props.language.warningTime}</DialogTitle>
+      <DialogContent tabIndex="-1" className="success-dialog-content">
+        <DialogContentText tabIndex="-1" className="success-dialog-content-text" id="alert-dialog-description">
+          {this.state.dialogConfirmationContentText}
+        </DialogContentText>
+        <WarningIcon tabIndex="-1" className="warning-dialog-icon"/>
+      </DialogContent>
+      <DialogActions>
+        {
+          (this.state.extraTime===true && this.state.panelshow!='adjust')?
+          <Button onClick={()=>this.handleMoreTime()} variant="contained"  color="primary" className="bar-button">{this.props.language.moreTime}</Button>	  
+          :
+          undefined
+        } 
+        <Button  onClick={()=>this.handleClosepublish()} color="primary" autoFocus>
+        {this.props.language.continue}
+        </Button>
+      </DialogActions>
+      </Dialog>
     )
   }
   handleClosepublish = () => {
     this.setState({ alert: 'cierra' });
   }
   handleMoreTime = () =>{
-    this.setState({ 
-      alert: 'cierra',
-      panelshow: 'adjust'
-  });
-
+    
+      this.setState({ 
+        alert: 'cierra',//nf
+        open:false,
+        panelshow: 'adjust',
+        extraTime:false
+      });
+      //add more time
+      let extendedtime=(this.state.extendedTime.split(":") )
+      let moreTime=(this.state.handleTick+ (parseInt(extendedtime[0])*60*60)+(parseInt(extendedtime[1])*60)+parseInt(extendedtime[2])) //seconds
+      this.setState({selectedtime: moreTime*1000})
+      
   }
+
   render() {
     const { classes } = this.props;
-    //console.log("vuelve ajsutar", this.state.selectedtime)
+   
     return(
       <div className="quiz-dashboard-container">
         {
@@ -364,90 +433,62 @@ class Quiz extends React.Component {
           undefined
           :
           <Paper elevation={10} className="quiz-dashboard-side" >
-          <p className="quiz-dashboard-primary-text">{this.props.quiz.attributes.quizTitle}</p>
+          <h2 className="quiz-dashboard-primary-text">{this.props.quiz.attributes.quizTitle}</h2>
           <QuestionAnswerIcon className="quiz-dashboard-icon"/>
-          <p className="quiz-dashboard-label-text">{this.props.language.timeLeft}</p>
+          <p className="quiz-dashboard-label-text">{this.props.language.timeLeft}</p> 
           {
-            this.state.panelshow==='cambio'?
-            this.cambio(this.state.selectedtime)
-            :
-            <div >
-              <TimerMachine 
-                timeStart={this.props.time} // start at 10 seconds
-                timeEnd={0} // end at 20 seconds
-                started={true}
-                paused={this.state.start}
-                countdown={true} // use as stopwatch
-                interval={1000} // tick every 1 second
-                formatTimer={(time, ms) =>
-                  moment.duration(ms, "milliseconds").format("hh:mm:ss", {
-                    trim: false
-                  })
-                }
-                onTick={time =>
-                  this.handleTick(time)
-                }
-                onComplete={time =>
-                  this.handleFinish(false)
-                }
-              />
-            <div className={classes.root }>
-                <LinearProgress />
-                <LinearProgress color="secondary" />
-            </div>
-          
-      </div>
+            this.cambio()
           }
-            <Button onClick={()=>this.stoptime()} className="course-item-video-card-media-button">{this.props.language.stopTime}</Button>
-            {
-                this.state.panelshow==='adjust' ?
-                <FormControl className={classes.formControl}>
-                <InputLabel id="demo-controlled-open-select-label">{this.props.language.adjustTime}</InputLabel>
-                <Select
-                  labelId="demo-controlled-open-select-label"
-                  id="demo-controlled-open-select"
-                  open={this.state.open}
-                  onClose={this.handleClose}
-                  onOpen={this.handleOpen}
-                  value={this.state.age}
-                  onChange={this.handleChangeselector}
-                >
-                  <MenuItem value={2}>x2</MenuItem>
-                  <MenuItem value={4}>x4</MenuItem>
-                  <MenuItem value={6}>x6</MenuItem>
-                  <MenuItem value={8}>x8</MenuItem>
-                  <MenuItem value={10}>x10</MenuItem>
-                </Select>
-              </FormControl>
+
+          {
+            this.state.extraTime===true?
+              <Button onClick={()=>this.handleMoreTime()} variant="contained"  color="primary" className="bar-button1">{this.props.language.moreTime}</Button>	
               :
-              <Button onClick={()=>this.adjust()} className="course-item-video-card-media-button" size="small" color="primary">{this.props.language.adjustTime}</Button>
-            }
+            undefined
+          }
+        
+          {
+            (this.state.panelshow==='adjust' && this.state.extraTime===true) ?
+            <div className="more-time alert">
+                <DialogTitle className="success-dialog-title" id="alert-dialog-title">
+                A time of {this.props.quiz.attributes.accessibility.dataField.extendedTimeValue} was assigned *
+                </DialogTitle>
+                <div className="center-row">	         
+                </div>
+          
+            </div>
+              :
+            undefined
+          }
+
+          {//option for no time
+            this.state.noTime===true?
+              <Button onClick={()=>this.stoptime()} className="course-item-video-card-media-button">{this.props.language.stopTime}</Button>
+              :
+              undefined
+          }
         </Paper>
         }
-       
         {
           this.state.alert==='alert' ?
-          this.alerta()
-          :
-          undefined
+            this.alerta()
+            :
+            undefined
         }
-
-       
         <Paper elevation={8} className="quiz-dashboard-questions-container">
           <p className="question-dashboard-label-text">{this.props.language.chooseCorrectAnswer}</p>
           <Divider/>
-
            <div className="question-dashboard-container">
             <FormControl component="fieldset" className="question-dashboard-form-control">
-              <FormLabel component="legend" className="question-dashboard-form-label">{this.props.quiz.attributes.questions[this.state.selected].questionTitle}</FormLabel>
+              <h3 component="legend" className="question-dashboard-form-label MuiFormLabel-root question-dashboard-form-label">{this.props.quiz.attributes.questions[this.state.selected].questionTitle}</h3>
               <RadioGroup
                 aria-label="answer"
                 name="answer"
                 className="question-dashboard-radio-group-student"
+                aria-required="true"
               >
                 {
                   this.props.quiz.attributes.questions[this.state.selected].answersText.map((text, index)=>{ 
-                   // console.log("answertTesxt", text)
                     return(
                       <FormControlLabel
                         control={
@@ -461,15 +502,13 @@ class Quiz extends React.Component {
                           />
                         }
                         label={text}
-                      />
-                          
+                      />      
                     )
                   })
                 }
               </RadioGroup>
             </FormControl>
           </div>
-
           {
             this.state.showFinishConfirmation ?
               <div className="question-dashboard-actions">
@@ -484,7 +523,7 @@ class Quiz extends React.Component {
                 <Button
                   className="question-dashboard-button"
                   color="primary"
-                  onClick={() => this.handleFinish(true)}
+                  onClick={() => this.handleFinish(true,"finish")}
                 >
                   {this.props.language.yes}
                 </Button>

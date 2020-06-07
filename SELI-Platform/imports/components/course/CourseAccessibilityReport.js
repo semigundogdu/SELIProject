@@ -123,8 +123,6 @@ const useStyles =theme => ({
       })
       //here make the calculation of percentages by unit
       this.percentages(Unid.name)
-      //console.log("Unidad q se va pasar" , Unid.name)
-      console.log("estado" , this.state) 
     })
     this.totalpercentages()
   }
@@ -320,18 +318,7 @@ const useStyles =theme => ({
   render() {
     const { classes } = this.props;
     return(  
-     /*  <div className="course-creator-container">   
-        {console.log("Propiedades----->",this.props)}
-        {this.getAccessibilitiePercentages()}
-        {this.state.courseInformation.support.map((disabilitie,index)=>{
-          return(
-            <div  key={`break-${index}`}>
-               {disabilitie.name}
-            </div>
-          )
-        })}
-      </div> */
-
+    
       <Grid container className={classes.root} spacing={2}>
         {console.log("Propiedades----->",this.props)}
         {this.getAccessibilitiePercentages()}

@@ -30,7 +30,7 @@ export default function ImageAccessibility(props) {
 		isA11Y,
 	} = props.data;
 
-	//console.log("dataField.imagePurpose",dataField)
+
 	return (
 		<React.Fragment>
 			<section id='image-decoration' className='accessib-form'>
@@ -162,7 +162,7 @@ export default function ImageAccessibility(props) {
 }
 
 export const useImageDataField = (props) => {
-
+	console.log("Propiedades en useImageDataField",props)
 	//feedback
 	const [shortDescriptionTip, setShortDescriptionTip] = React.useState(getShortDescriptionTip('info'));
 	const [longDescriptionTip, setLongDescriptionTip] = React.useState(getLongDescriptionTip('info'));
@@ -174,7 +174,6 @@ export const useImageDataField = (props) => {
 	const [toogleShort, setToogleShort] = React.useState(false);
 	const [toogleLong, setToogleLong] = React.useState(true);
 	const [toogleValue, setTvalue] = React.useState('');
-
 	const [dataField, setDataField] = React.useState({
 		longDescription:'',
 		shortDescription:'',
@@ -200,9 +199,7 @@ export const useImageDataField = (props) => {
 	}, [])
 
 	useEffect(() => {
-
 		let value = dataField.imagePurpose;
-
 		setImagePurposeTip(getImagePurposeTip(value));
 		setImagePurposeLabel(getImagePurposeLabel(value));
 		setShortDescriptionTip(getShortDescriptionTip(value));
@@ -236,7 +233,7 @@ export const useImageDataField = (props) => {
 
 
 	const handleImagePurposeOnChange = event => {
-		console.log("event and target-----------------", event.target)
+		//console.log("event and target-----------------", event.target)
 		const { name, value } = event.target;
 	
 		let data = {
@@ -252,7 +249,7 @@ export const useImageDataField = (props) => {
 		if(toogleLong != longToogle)
 			setToogleLong(longToogle);
 
-		console.log("event and target-----------------", event.target)
+		//console.log("event and target-----------------", event.target)
 		updateAccessibilityProgress(shortToogle, longToogle, name );
 
 		// let arr = [...isA11Y];
@@ -285,7 +282,7 @@ export const useImageDataField = (props) => {
 	
 	}
 	function updateAccessibilityProgress( shortToogle, longToogle ,toogleValue ){
-		console.log("shortToogle, longToogle----",shortToogle, longToogle, toogleValue ,props)
+		//console.log("shortToogle, longToogle----",shortToogle, longToogle, toogleValue ,props)
 		if(!shortToogle && longToogle) //hide shortDescription === hideLongDescription
 		{	
 				if(toogleValue==='info'){

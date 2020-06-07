@@ -4,8 +4,6 @@ import VideoPreview from '../files/previews/VideoPreview';
 import Editor from '../inputs/editor/Editor';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Button from '@material-ui/core/Button';
-import Tooltip from '@material-ui/core/Tooltip';
 import Library from '../tools/Library';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import HttpIcon from '@material-ui/icons/Http';
@@ -14,13 +12,10 @@ import TextField from '@material-ui/core/TextField';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
-import IconButton from '@material-ui/core/IconButton';
 import Switch from '@material-ui/core/Switch';
 import FolderSpecialIcon from '@material-ui/icons/FolderSpecial';
-import Fab from '@material-ui/core/Fab'
-import AudioPreview from '../files/previews/AudioPreview';
-import AudioRecorder from '../tools/AudioRecorder';
-
+import Fab from '@material-ui/core/Fab';
+import AccessibilityHelp from '../tools/AccessibilityHelp';
 
 export default class VideoForm extends React.Component {
   constructor(props) {
@@ -235,10 +230,11 @@ export default class VideoForm extends React.Component {
         else {
           this.setState({
             validUrl: true,
-            url: this.state.attributes.video.link,
+            url: (this.state.attributes.video!=undefined)? (this.state.attributes.video.link): (undefined),
             helperColor: "#4caf50",
             urlMessage: this.props.language.thePlayerCan,
             showHelperText: true,
+            showPreview: false,
           })
         }
       })
@@ -291,7 +287,9 @@ export default class VideoForm extends React.Component {
                                 user={Meteor.userId()}
                                 accept={'video/*'}
                                 label={this.props.language.uploadVideoButtonLabel}
+                                handleControlMessage={this.props.handleControlMessage.bind(this)}
                                 getFileInformation={this.getFileInformation.bind(this)}
+                                language={this.props.language}
                               />
                             :
                               <div>
@@ -330,6 +328,17 @@ export default class VideoForm extends React.Component {
                           </div>
                         </div>
                     }
+                    <div className="form-editor-label">
+                      <AccessibilityHelp 
+                        id={'short-description-help-container'} 
+                        name={'shortDescriptionHelpContainer'} 
+                        error={!this.state.showPreview} 
+                        tip={!this.state.showPreview? this.props.language.uploadVideo: this.props.language.uploadVideoCorrect} 
+                        //step={props.step}
+                        //stepLabel={props.stepLabel}
+                        language={this.props.language}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="course-creator-form-column">
@@ -353,6 +362,7 @@ export default class VideoForm extends React.Component {
                       </FormGroup>
                     </div>
                     <div style={this.state.attributes.hasDescription ? undefined :{pointerEvents: "none", userSelect: "none"}} className="editor-block">
+                      <p className="editor-label">{`${this.props.language.activityInstructions}:`}</p>
                       <Editor
                         areaHeight='20vh'
                         innerHTML={this.state.attributes.description}

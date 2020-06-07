@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Divider from '@material-ui/core/Divider';
-import Typography from '@material-ui/core/Typography';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
@@ -16,21 +15,21 @@ import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import StorytellingPlayer from '../../storytelling/StorytellingPlayer';
-
 import AttachmentPreview from '../../files/previews/AttachmentPreview';
 import FileUpload from '../../files/FileUpload';
-import Editor from '../../inputs/editor/Editor';
+//import Editor from '../../inputs/editor/Editor';
 import Paper from '@material-ui/core/Paper';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
-import SendIcon from '@material-ui/icons/Send';
-import Fab from '@material-ui/core/Fab';
-import Tooltip from '@material-ui/core/Tooltip';
 import InfoIcon from '@material-ui/icons/Info';
 import { Tracker } from 'meteor/tracker';
 import { Activities } from '../../../../lib/ActivitiesCollection';
+import EditorLinks from '../../inputs/editor/Editor';
+import AccessibilityHelp from '../../tools/AccessibilityHelp';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+/* import { Editor, EditorState, convertFromRaw } from "draft-js";
+import A11yEditor from './Editordraft'; */
 
 export default class ActivityItem extends React.Component {
   constructor(props) {
@@ -42,8 +41,6 @@ export default class ActivityItem extends React.Component {
       resolved: false,
       textSection: '',
       myStories: [],
-      insertText: false,
-      commentText: '',
       index: 0,
       activityId: '',
     }
@@ -58,7 +55,22 @@ export default class ActivityItem extends React.Component {
   }
 
   componentDidMount(){
-    this.getStories();
+    let dialogText;
+    if (this.props.item.attributes.type === 'forum') {
+      dialogText = `<p>${this.props.item.attributes.instruction}</p>`
+    } else if (this.props.item.attributes.type === 'upload') {
+      dialogText = `<p>${this.props.language.toActivityUpload}.</p></br><p>${this.props.item.attributes.instruction}</p>`
+    } else if (this.props.item.attributes.type === 'section') {
+      dialogText = `<p>${this.props.language.toActivityWrite}.</p></br><p>${this.props.item.attributes.instruction}</p>`
+    } else if (this.props.item.attributes.type === 'storyboard') {
+      dialogText = `<p>${this.props.language.toActivityStoryboard}.</p></br><p>${this.props.item.attributes.instruction}</p>`
+    }
+    this.setState({
+      dialogText,
+    });
+    if (this.props.item.attributes.type === 'forum' || this.props.item.attributes.type === 'storyboard') {
+      this.getStories();
+    }
     this.getIndex();
   }
 
@@ -116,31 +128,23 @@ export default class ActivityItem extends React.Component {
   }
 
   doActivity = () => {
-    if (this.props.item.attributes.type !== 'forum') {
-      this.handleClickOpen();
-      let dialogText;
-      let confirmAction;
-      if (this.props.item.attributes.type === 'upload') {
-        dialogText = this.props.language.toActivityUpload,
-        confirmAction = () => this.sendFile();
-      }
-      if (this.props.item.attributes.type === 'section') {
-        dialogText = this.props.language.toActivityWrite,
-        confirmAction = () => this.sendSection();
-      }
-      if (this.props.item.attributes.type === 'storyboard') {
-        dialogText = this.props.language.toActivityStoryboard,
-        confirmAction = () => this.sendStoryboard();
-      }
-      this.setState({
-        dialogText: dialogText,
-        confirmAction: confirmAction,
-      });
-    } else {
-      this.setState({
-        insertText: true,
-      });
+    this.handleClickOpen();
+    let confirmAction;
+    if (this.props.item.attributes.type === 'forum') {
+      confirmAction = () => this.sendComment();
     }
+    if (this.props.item.attributes.type === 'upload') {
+      confirmAction = () => this.sendFile();
+    }
+    if (this.props.item.attributes.type === 'section') {
+      confirmAction = () => this.sendSection();
+    }
+    if (this.props.item.attributes.type === 'storyboard') {
+      confirmAction = () => this.sendStoryboard();
+    }
+    this.setState({
+      confirmAction: confirmAction,
+    });
   }
 
   sendComment = () => {
@@ -150,7 +154,7 @@ export default class ActivityItem extends React.Component {
     comment.id = Math.random();
     comment.userId = Meteor.userId();
     comment.date = new Date();
-    comment.label = this.state.commentText;
+    comment.label = this.state.textSection;
     comment.media = [];
     data.push(comment);
     Activities.update(
@@ -162,7 +166,7 @@ export default class ActivityItem extends React.Component {
           this.props.completeActivity(this.props.item.id, activity.activity);
         }
         this.setState({
-          commentText: '',
+          textSection: '',
         })
       }
     );
@@ -211,7 +215,7 @@ export default class ActivityItem extends React.Component {
       let activity = {
         textSection: this.state.textSection,
         type: 'section',
-        public: false,
+        public: true,
       }
       this.props.completeActivity(this.props.item.id, activity);
       this.handleClose();
@@ -230,7 +234,7 @@ export default class ActivityItem extends React.Component {
     this.setState({
       file: file,
       showPreview: true,
-    });
+    });   
   }
 
   unPickFile(){
@@ -244,11 +248,6 @@ export default class ActivityItem extends React.Component {
     if (name === 'additionalNotes') {
       this.setState({
         additionalNotes: event.target.value,
-      });
-    }
-    if (name === 'forum') {
-      this.setState({
-        commentText: event.target.value,
       });
     }
   }
@@ -288,11 +287,15 @@ export default class ActivityItem extends React.Component {
     this.getIndex()
   }
 
-/*   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.item.id !== this.props.item.id) {
-      this.getIndex();
-    }
-  } */
+  componentDidUpdate(){
+    
+  }
+
+ closeer=()=>{
+  this.setState({
+    alert:"Noalert"
+  })
+ }
 
   render() {
     return(
@@ -307,7 +310,7 @@ export default class ActivityItem extends React.Component {
                       defaultExpanded
                       expanded={this.props.item.attributes.expanded}
                       onChange={this.handleChangePanel('activity-panel')}
-                      className="item-quiz-panel"
+                      className="activity-parent-panel"
                     >
                       <ExpansionPanelSummary
                         expandIcon={<ExpandMoreIcon />}
@@ -316,20 +319,22 @@ export default class ActivityItem extends React.Component {
                         className="item-quiz-expansion-summary"
                       >
                         <div className="item-quiz-expansion-summary-text-container">
-                          <Typography className="activity-panel-title">{this.props.language.activity}</Typography>
-                          <Typography className="quiz-panel-subtitle">
-                            { this.props.item.attributes.type === 'storyboard' ? this.props.language.storyboardActivity : undefined }
-                            { this.props.item.attributes.type === 'upload' ? this.props.language.uploaddActivity : undefined }
-                            { this.props.item.attributes.type === 'section' ? this.props.language.textSectionActivity : undefined }
-                            { this.props.item.attributes.type === 'forum' ? this.props.language.forum : undefined }
-                          </Typography>
+                          <h2 className="activity-panel-title  MuiTypography-root activity-panel-title MuiTypography-body1">{this.props.language.activity}</h2>
+                          <h3 className="quiz-panel-subtitle MuiTypography-root quiz-panel-subtitle MuiTypography-body1">
+                            <Button className="quiz-panel-subtitle " aria-expanded="true" aria-controls="sect1" id="acc1id"  size="large" >
+                              { this.props.item.attributes.type === 'storyboard' ? this.props.language.storyboardActivity : undefined }
+                              { this.props.item.attributes.type === 'upload' ? this.props.language.uploaddActivity : undefined }
+                              { this.props.item.attributes.type === 'section' ? this.props.language.textSectionActivity : undefined }
+                              { this.props.item.attributes.type === 'forum' ? this.props.language.forum : undefined }
+                            </Button>
+                          </h3>
                         </div>
                       </ExpansionPanelSummary>
                       <ExpansionPanelDetails className="item-quiz-detail">
                         <div className="item-quiz-detail-container">
                           <p className="activity-instruction-title">{this.props.language.instructions}</p>
                           <div className="activity-item-container-instruction"
-                            dangerouslySetInnerHTML={{__html:this.props.item.attributes.instruction}}>
+                            dangerouslySetInnerHTML={{__html: this.state.dialogText}}>
                           </div>
                           {
                             this.props.item.attributes.type === 'upload' ?
@@ -384,6 +389,9 @@ export default class ActivityItem extends React.Component {
                                 <div className="activity-item-container-instruction"
                                   dangerouslySetInnerHTML={{__html: this.state.activityInformation.activity.textSection}}>
                                 </div>
+                                {/* <Editor 
+                                  editorState={this.Texteditor()} readOnly={false} 
+                                />  */}
                               </div>
                             :
                               undefined
@@ -412,34 +420,7 @@ export default class ActivityItem extends React.Component {
                       <Divider />
                       <ExpansionPanelActions className="quiz-item-actions">
                         {
-                          this.props.item.attributes.type === 'forum' ?
-                            this.state.insertText || this.props.fromTutor || this.state.resolved ?
-                              <div className="activity-comment">
-                                <TextField
-                                  id="name-input"
-                                  label={this.props.language.reply}
-                                  margin="normal"
-                                  variant="outlined"
-                                  multiline
-                                  fullWidth
-                                  autoComplete={"off"}
-                                  required
-                                  value={this.state.commentText}
-                                  onChange={this.handleChange('forum')}
-                                />
-                                <Tooltip onClick={() => this.sendComment()} title={this.props.language.send}>
-                                  <Fab className="course-item-comment-card-media-fab" size="small">
-                                    <SendIcon color="primary"/>
-                                  </Fab>
-                                </Tooltip>
-                              </div>
-                            :
-                              undefined
-                          :
-                            undefined
-                        }
-                        {
-                          this.props.fromTutor || this.state.insertText ? undefined : 
+                          this.props.fromTutor ? undefined : 
                             <div>
                               <Button size="medium">
                                 {this.props.language.setReminder}
@@ -477,20 +458,26 @@ export default class ActivityItem extends React.Component {
         >
           <DialogTitle className="success-dialog-title" id="alert-dialog-title">{this.props.language.doActivity}</DialogTitle>
           <DialogContent className="stories-dialog-content">
-            <DialogContentText className="success-dialog-content-text" id="alert-dialog-description">
+            {/* <DialogContentText className="success-dialog-content-text" id="alert-dialog-description">
               {this.state.dialogText}
-            </DialogContentText>
+            </DialogContentText> */}
+            <div className="success-dialog-content-text" id="alert-dialog-description"
+              dangerouslySetInnerHTML={{__html: this.state.dialogText}}>
+            </div>
             {
               this.props.item.attributes.type === 'upload' ?
                 <div style={{width: '100%'}}>
+                  <br></br>
                   {
                     !this.state.showPreview ?
                       <FileUpload
                         type={this.props.item.attributes.fileTypes.label.toLowerCase()}
                         user={Meteor.userId()}
                         accept={this.props.item.attributes.fileTypes.accept}
+                        handleControlMessage={this.props.handleControlMessage.bind(this)}
                         getFileInformation={this.getFileInformation.bind(this)}
                         label={this.props.language.clickUploadFile}
+                        language={this.props.language}
                       />
                     :
                       <AttachmentPreview
@@ -499,6 +486,139 @@ export default class ActivityItem extends React.Component {
                         language={this.props.language}
                       />
                   }
+                  
+                  <div>
+                      {
+                          this.props.item.attributes.fileTypes.label==="Compressed"?
+                          <div className="form-editor-label">
+                            <AccessibilityHelp 
+                              id={'short-description-help-container'} 
+                              name={'shortDescriptionHelpContainer'} 
+                              error={!this.state.showPreview} 
+                              tip={!this.state.showPreview? this.props.language.uploadCompressed: this.props.language.uploadCompressedCorrect} 
+                              //step={props.step}
+                              //stepLabel={props.stepLabel}
+                              language={this.props.language}
+                            />
+                          </div>
+                          :
+                          undefined
+                      }
+                      {
+                          this.props.item.attributes.fileTypes.label==="Audio"?
+                          <div className="form-editor-label">
+                            <AccessibilityHelp 
+                              id={'short-description-help-container'} 
+                              name={'shortDescriptionHelpContainer'} 
+                              error={!this.state.showPreview} 
+                              tip={!this.state.showPreview? this.props.language.uploadAudio: this.props.language.uploadAudioCorrect} 
+                              //step={props.step}
+                              //stepLabel={props.stepLabel}
+                              language={this.props.language}
+                            />
+                          </div>
+                          :
+                          undefined
+                      }
+                      {
+                          this.props.item.attributes.fileTypes.label==="Video"?
+                          <div className="form-editor-label">
+                            <AccessibilityHelp 
+                              id={'short-description-help-container'} 
+                              name={'shortDescriptionHelpContainer'} 
+                              error={!this.state.showPreview} 
+                              tip={!this.state.showPreview? this.props.language.uploadVideo: this.props.language.uploadVideoCorrect} 
+                              //step={props.step}
+                              //stepLabel={props.stepLabel}
+                              language={this.props.language}
+                            />
+                          </div>
+                          :
+                          undefined
+                      }
+                      {
+                          this.props.item.attributes.fileTypes.label==="Word"?
+                          <div className="form-editor-label">
+                            <AccessibilityHelp 
+                              id={'short-description-help-container'} 
+                              name={'shortDescriptionHelpContainer'} 
+                              error={!this.state.showPreview} 
+                              tip={!this.state.showPreview? this.props.language.uploadWord: this.props.language.uploadWordCorrect} 
+                              //step={props.step}
+                              //stepLabel={props.stepLabel}
+                              language={this.props.language}
+                            />
+                          </div>
+                          :
+                          undefined
+                      }
+                      {
+                          this.props.item.attributes.fileTypes.label==="Pdf"?
+                          <div className="form-editor-label">
+                            <AccessibilityHelp 
+                              id={'short-description-help-container'} 
+                              name={'shortDescriptionHelpContainer'} 
+                              error={!this.state.showPreview} 
+                              tip={!this.state.showPreview? this.props.language.uploadPdf: this.props.language.uploadPdfCorrect} 
+                              //step={props.step}
+                              //stepLabel={props.stepLabel}
+                              language={this.props.language}
+                            />
+                          </div>
+                          :
+                          undefined
+                      }
+                      {
+                          this.props.item.attributes.fileTypes.label==="Image"?
+                          <div className="form-editor-label">
+                            <AccessibilityHelp 
+                              id={'short-description-help-container'} 
+                              name={'shortDescriptionHelpContainer'} 
+                              error={!this.state.showPreview} 
+                              tip={!this.state.showPreview? this.props.language.uploadImage: this.props.language.uploadImageCorrect} 
+                              //step={props.step}
+                              //stepLabel={props.stepLabel}
+                              language={this.props.language}
+                            />
+                          </div>
+                          :
+                          undefined
+                      }
+                      {
+                          this.props.item.attributes.fileTypes.label==="Power point"?
+                          <div className="form-editor-label">
+                            <AccessibilityHelp 
+                              id={'short-description-help-container'} 
+                              name={'shortDescriptionHelpContainer'} 
+                              error={!this.state.showPreview} 
+                              tip={!this.state.showPreview? this.props.language.uploadPowerPoint: this.props.language.uploadPowerPointCorrect} 
+                              //step={props.step}
+                              //stepLabel={props.stepLabel}
+                              language={this.props.language}
+                            />
+                          </div>
+                          :
+                          undefined
+                      }
+                      {
+                          this.props.item.attributes.fileTypes.label==="Excel"?
+                          <div className="form-editor-label">
+                            <AccessibilityHelp 
+                              id={'short-description-help-container'} 
+                              name={'shortDescriptionHelpContainer'} 
+                              error={!this.state.showPreview} 
+                              tip={!this.state.showPreview? this.props.language.uploadExcel: this.props.language.uploadExcelCorrect} 
+                              //step={props.step}
+                              //stepLabel={props.stepLabel}
+                              language={this.props.language}
+                            />
+                          </div>
+                          :
+                          undefined
+                      }
+                  </div>
+                  
+                
                   <TextField
                     id="biography-input"
                     label={`${this.props.language.additionalNotes}:`}
@@ -514,18 +634,30 @@ export default class ActivityItem extends React.Component {
               :
               undefined
             }
-            {
+            {/* {
               this.props.item.attributes.type === 'section' ?
-                <Editor
+                <A11yEditor
+                  getEditorState={this.getEditorState}
+                  language={this.props.language}
+                  value={this.Texteditor()}
+                />
+            :
+              undefined
+            } */}
+            {
+              this.props.item.attributes.type === 'section'  || this.props.item.attributes.type === 'forum' ?
+                <EditorLinks
+                  id="comment-input"
                   areaHeight='20vh'
                   innerHTML={this.state.textSection}
                   buttonLabels={false}
                   addLinks={true}
+                  stories={this.props.item.attributes.type === 'forum' ? this.state.myStories : undefined}
                   getInnerHtml={this.getInnerHtml.bind(this)}
                   language={this.props.language}
                 />
               :
-              undefined
+                undefined
             }
             {
               this.props.item.attributes.type === 'storyboard' ?
@@ -545,12 +677,14 @@ export default class ActivityItem extends React.Component {
                         <LibraryBooksIcon className="story-item-icon"/>
                         <p className="story-item-text-primary">{story.activity.name}</p>
                         <Link className="story-item-button"
-                          //target="_blank"
+                          target="_blank"
                           to={`/story#${story._id}`}
                         >
-                          <Button variant="contained" color="secondary">
-                            {this.props.language.open}
-                          </Button>
+                          <Tooltip title={this.props.language.open} placement="left">
+                            <IconButton color="secondary" aria-label="open">
+                              <img src="openNew.svg"/>
+                            </IconButton>
+                          </Tooltip>
                         </Link>
                       </Paper>
                     )

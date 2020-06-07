@@ -18,6 +18,8 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import Editor from '../inputs/editor/Editor';
 import Tooltip from '@material-ui/core/Tooltip';
+import AccessibilityHelp from '../tools/AccessibilityHelp'
+import PositionedSnackbar from "./ContentAlert"
 
 
 export default class ImageForm extends React.Component {
@@ -66,7 +68,7 @@ export default class ImageForm extends React.Component {
 
   getFileInformation(file){
     let attributes = this.state.attributes;
-    attributes.image = file;  ///deberia cambiar
+    attributes.image = file;
     this.setState({
       attributes: attributes,
       showPreview: true,
@@ -133,6 +135,11 @@ export default class ImageForm extends React.Component {
             showPreview: true,
           })
         }
+        else {
+          this.setState({
+            showPreview: false,
+          })
+        }
       })
     }
   }
@@ -168,7 +175,9 @@ export default class ImageForm extends React.Component {
                       user={Meteor.userId()}
                       accept={'image/*'}
                       label={this.props.language.uploadImageButtonLabel}
+                      handleControlMessage={this.props.handleControlMessage.bind(this)}
                       getFileInformation={this.getFileInformation.bind(this)}
+                      language={this.props.language}
                     />
                   </div>
                 :
@@ -180,6 +189,17 @@ export default class ImageForm extends React.Component {
                   coordenadaR={this.setState.coordenadaR}
                 />
               }
+              <div className="form-editor-label">
+                <AccessibilityHelp 
+                    id={'short-description-help-container'} 
+                    name={'shortDescriptionHelpContainer'} 
+                    error={!this.state.showPreview} 
+                    tip={!this.state.showPreview? this.props.language.uploadImage: this.props.language.uploadImageCorrect}
+                    //step={props.step}
+                    //stepLabel={props.stepLabel}
+                    language={this.props.language}
+                />
+              </div>
               <div className="scroll-media-input-container">
                 <div className="margin-center-row">
                   <br/>
@@ -219,6 +239,7 @@ export default class ImageForm extends React.Component {
                   </Grid>
                 </div>
                 <div style={this.state.attributes.hasDescription ? undefined :{pointerEvents: "none", userSelect: "none"}} className="editor-block">
+                  <p className="editor-label">{`${this.props.language.activityInstructions}:`}</p>
                   <Editor
                     areaHeight="18.5vh"
                     buttonLabels={false}

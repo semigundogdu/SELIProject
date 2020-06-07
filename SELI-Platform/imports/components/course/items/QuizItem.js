@@ -9,6 +9,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from '@material-ui/core/Button';
 import DragItem from './DragItem'
 import Divider from '@material-ui/core/Divider';
+import ItemFeedback from '../../accessibility/ItemFeedback';
 export default class QuizItem extends React.Component {
   constructor(props) {
     super(props);
@@ -47,8 +48,13 @@ export default class QuizItem extends React.Component {
                 className="item-quiz-expansion-summary"
               >
                 <div className="item-quiz-expansion-summary-text-container">
-                  <Typography className="quiz-panel-title">{this.props.language.quiz}</Typography>
-                  <Typography className="quiz-panel-subtitle">{this.props.item.attributes.quizTitle}</Typography>
+                  <h2 className="quiz-panel-title MuiTypography-root  MuiTypography-body1">
+                    <Button className="quiz-panel-subtitle " aria-expanded="true" aria-controls="sect1" id="acc1id"  size="large" >
+                    {this.props.language.quiz}
+                    </Button>
+                  </h2>
+                
+                  <h3 className="quiz-panel-subtitle MuiTypography-root quiz-panel-subtitle MuiTypography-body1">{this.props.item.attributes.quizTitle}</h3>
                 </div>
               </ExpansionPanelSummary>
               <ExpansionPanelDetails className="item-quiz-detail">
@@ -79,12 +85,18 @@ export default class QuizItem extends React.Component {
             item={this.props.item}
             removeItem={this.props.removeItem.bind(this)}
             editItem={this.props.editItem.bind(this)}
+            handleDecorative={this.props.handleDecorative.bind(this)}
+            editAccessibilityForm={this.props.editAccessibilityForm.bind(this)}
             language={this.props.language}
           />
         </div>
         <Divider orientation="vertical" />
         <DragItem
         language={this.props.language}
+        />
+        <ItemFeedback
+          accessibility={this.props.item.attributes.accessibility}
+          language={this.props.language}
         />
       </div>
       );

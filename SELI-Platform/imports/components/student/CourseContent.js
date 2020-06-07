@@ -23,6 +23,7 @@ import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 
 
 
+
 export default class CourseContent extends React.Component {
   constructor(props) {
     super(props);
@@ -32,11 +33,8 @@ export default class CourseContent extends React.Component {
   }
 
   showControlMessage(){
-
   }
-
   componentDidMount() {
-
   }
 
   render() {
@@ -186,6 +184,7 @@ export default class CourseContent extends React.Component {
                         :
                         undefined
                       }
+                     
                       {
                         item.type === "quiz" ?
                           <QuizItem
@@ -417,6 +416,8 @@ export default class CourseContent extends React.Component {
                     }
                     {
                       item.type === "quiz" ?
+                      <div>
+                        {console.log("fromTutor 4", this.props.fromTutor )}
                         <QuizItem
                           fromTutor={this.props.fromTutor ? this.props.fromTutor : undefined}
                           item={item}
@@ -427,6 +428,8 @@ export default class CourseContent extends React.Component {
                           key={Math.random()}
                           language={this.props.language}
                         />
+                      </div>
+                        
                       :
                       undefined
                     }

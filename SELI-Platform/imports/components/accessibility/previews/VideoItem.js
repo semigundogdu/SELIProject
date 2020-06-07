@@ -35,15 +35,15 @@ export default class VideoItem extends React.Component {
       <div className="content-box">
         <div className="image-content-item">
           <Card className="course-item-video-card">
-            <CardActionArea className="course-item-video-card-media-action-area">
+            <Card className="course-item-video-card-media-action-area">
               {
                 this.props.item.source === 'upload' ?
                   <CardMedia
                     className="course-item-video-card-media"
-                    src={this.props.item.video.link}
+                    src={(this.props.item.video)?(this.props.item.video.link):(undefined)}
                     component="video"
-                    video={this.props.item.video.link}
-                    title={this.props.item.video.name}
+                    video={(this.props.item.video)?(this.props.item.video.link):(undefined)}
+                    title={(this.props.item.video)?(this.props.item.video.name):(undefined)}
                   />
                 :
                 <ReactPlayer className="course-creator-item-video-card-preview-player" url={this.props.item.video.link}/>
@@ -66,7 +66,7 @@ export default class VideoItem extends React.Component {
                   undefined
                 }
               </CardContent>
-            </CardActionArea>
+            </Card>
             <CardActions className="course-item-video-card-media-actions-container">
               {
                 this.props.item.externalLink !== '' ?

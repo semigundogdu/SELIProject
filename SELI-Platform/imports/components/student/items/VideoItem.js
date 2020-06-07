@@ -40,7 +40,6 @@ export default class VideoItem extends React.Component {
   }
 
   componentDidMount() {
-    console.log("En video", this.props.item.attributes)
     /* if(this.props.item.attributes.accessibility.dataField!=undefined){
       const contentState = convertFromRaw(this.props.item.attributes.accessibility.dataField.longDescription);
       this.setState({editorState:EditorState.createWithContent(contentState)});
@@ -48,7 +47,7 @@ export default class VideoItem extends React.Component {
   }
 
   checkbox=(event, name)=>{
-    console.log("event and name", event, name)
+    //console.log("event and name", event, name)
     if(event===true && name==='signLanguage'){//Videosignal
       this.setState({
         signalShow:"signalShow"
@@ -149,7 +148,7 @@ export default class VideoItem extends React.Component {
         <div className="image-content-item">
           <Card className="course-item-video-card2">
             {this.checkBoxLabels()}
-            <CardActionArea className="course-item-video-card-media-action-area">
+            <Card className="course-item-video-card-media-action-area">
                  {
                   (this.props.item.attributes.video.name==="External video" )?
                   <ReactPlayer 
@@ -245,7 +244,7 @@ export default class VideoItem extends React.Component {
                   undefined
                 }
               </CardContent>
-            </CardActionArea>
+            </Card>
             <div>
 
             {//For text Alternatives
