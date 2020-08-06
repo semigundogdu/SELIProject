@@ -12,6 +12,8 @@ import { Tracker } from 'meteor/tracker';
 
 import Home from '../imports/ui/Home';
 import User from '../imports/ui/User';
+import Community from '../imports/ui/Community';
+
 import Administrator from '../imports/ui/Administrator';
 import UserRegistration from '../imports/ui/UserRegistration';
 import RetrievePasswd from '../imports/ui/RetrievePasswd';
@@ -44,6 +46,7 @@ Meteor.startup(() => {
       <Switch >
         <Route exact path="/" component={Home} history={history}/>
         <Route exact path="/user" component={User} history={history}/>
+        <Route exact path="/Community" component={Community} history={history}/>
         <Route exact path="/administrator" component={Administrator} history={history}/>
         <Route exact path="/UserRegistration" component={UserRegistration} history={history}/>
         <Route exact path="/RetrievePasswd" component={RetrievePasswd} history={history}/>

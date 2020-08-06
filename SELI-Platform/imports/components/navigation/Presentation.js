@@ -156,6 +156,23 @@ export default class Presentation extends React.Component {
                   }
                 </div>
               </div>
+              <div id="dashboard-5" className="dashboard">
+                <div className="dashboard-center-container">
+                  <h1 className="dashboard-text-large">
+                    {this.props.language.seliStoriesAbout}
+                  </h1>
+                  <AccessibilityNewIcon className="dashboard-large-icon"/>
+                  <p className="dashboard-paragraph">
+                    {this.props.language.accessibilityPresentation}
+                  </p>
+                  <Button
+                    className="dashboard-link-button-black"
+                    onClick={() => this.props.history.push('/community')}
+                  >
+                    <MoreHorizIcon  className="dashboard-link-icon"/> {this.props.language.learnMore}
+                  </Button>
+                </div>
+              </div>
               <div id="dashboard-3" className="dashboard">
                 <div className="dashboard-center-container">
                   <h1 className="dashboard-text-large">
@@ -173,6 +190,7 @@ export default class Presentation extends React.Component {
                   </Button>
                 </div>
               </div>
+             
               <div id="dashboard-4" className="dashboard">
                 <div className="dashboard-center-container">
                   <h1 className="dashboard-text-large">
@@ -233,3 +251,5 @@ export default class Presentation extends React.Component {
     )
   }
 }
+
+

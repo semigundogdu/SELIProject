@@ -23,6 +23,7 @@ var PORTUGUESE = {
   instructionalDesign: "Design instrucional!",
   instructionalDesignPresentation: "O design instrucional é a criação de experiências e materiais de aprendizado de uma maneira que resulte na aquisição e aplicação de conhecimentos e habilidades. A disciplina segue um sistema de avaliar necessidades, planejar um processo, desenvolver materiais e avaliar sua eficácia. No contexto da aprendizagem no local de trabalho, o Design Instrucional fornece um processo prático e sistemático para projetar efetivamente um currículo eficaz.",
   account: "conta",
+  SeliStories:"SELI STORIES",
   teachOnSeliText: "Crie e projete seus próprios cursos!",
   becomeATutor: "Seja um tutor",
   whatIsSeli: "O que é SELI?",

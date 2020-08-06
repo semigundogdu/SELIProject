@@ -23,6 +23,7 @@ var TURKISH = {
   instructionalDesign: "Öğretim Tasarımı!",
   instructionalDesignPresentation: "Öğretim tasarımı, bilgi ve becerilerin kazanılması ve uygulanmasına yol açacak şekilde öğrenme deneyimleri ve materyallerinin oluşturulmasıdır. Disiplin ihtiyaçları değerlendirme, bir süreç tasarlama, materyal geliştirme ve etkinliklerini değerlendirme sistemini takip eder. İşyerinde öğrenme bağlamında Öğretim Tasarımı, etkili bir müfredatın etkili bir şekilde tasarlanması için pratik ve sistematik bir süreç sağlar.",
   account: "Hesap",
+  SeliStories:"SELİ HİKAYELERİ",
   teachOnSeliText: "Kendi dersini tasarla ve oluştur!",
   becomeATutor: "Öğretmen olarak katıl!",
   whatIsSeli: "SELI nedir?",

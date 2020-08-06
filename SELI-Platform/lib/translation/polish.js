@@ -23,6 +23,7 @@
   instructionalDesign: "Myślenie o interfejsie",
   instructionalDesignPresentation: "Projektowanie instruktażowe polega na tworzeniu doświadczeń i materiałów dydaktycznych w sposób, który prowadzi do zdobycia i zastosowania wiedzy i umiejętności. Dyscyplina ta opiera się na systemie oceny potrzeb, projektowania procesu, opracowywania materiałów i oceny ich skuteczności. W kontekście uczenia się w miejscu pracy, projektowanie instruktażowe zapewnia praktyczny i systematyczny proces skutecznego tworzenia efektywnego programu nauczania.",
   account: "Konto",
+  SeliStories:"SELI STORIES",
   teachOnSeliText: "Twórz swoje własne konto",
   becomeATutor: "Zostań nauczycielem",
   whatIsSeli: "Czym jest SELI?",

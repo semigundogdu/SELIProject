@@ -23,6 +23,7 @@ var ENGLISH = {
   instructionalDesign: "Instructional design!",
   instructionalDesignPresentation: "Instructional design is the creation of learning experiences and materials in a manner that results in the acquisition and application of knowledge and skills. The discipline follows a system of assessing needs, designing a process, developing materials and evaluating their effectiveness. In the context of workplace learning, Instructional Design provides a practical and systematic process for effectively designing effective curriculum.",
   account: "Account",
+  SeliStories:"SELI STORIES",
   teachOnSeliText: "Create and design your own courses!",
   becomeATutor: "Become a tutor",
   whatIsSeli: "What is SELI?",
